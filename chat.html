@@ -457,7 +457,7 @@
       let editingMessageId = null;
       let editingType = null;
       let userId = null;
-      let activeChatId = 2;
+      let activeChatId = null;
 
       let savedUser = JSON.parse(localStorage.getItem("User")) || [];
       let savedSender;
@@ -549,7 +549,6 @@
           if (!this.value) return;
 
           activeChatId = Number(this.value);
-          console.log("active chat id: ", activeChatId);
           loadStoredMessages();
         });
       }
@@ -571,7 +570,6 @@
 
               chat.onclick = function () {
                 activeChatId = item.id;
-
                 loadStoredMessages();
               };
 
@@ -587,6 +585,8 @@
               chat.appendChild(avatar);
               chat.append(nameSpan);
               selectElement.appendChild(chat);
+
+              break;
             }
           }
         });
