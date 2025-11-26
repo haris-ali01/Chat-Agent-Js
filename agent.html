@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Agent</title>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #333;
+      }
+
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        width: 500px;
+        max-width: 90%;
+        background-color: #ffffff;
+        border-radius: 1.5rem;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      }
+
+      .intro {
+        margin-bottom: 2rem;
+        width: 100%;
+      }
+
+      .intro h1 {
+        font-size: 2.2rem;
+        font-weight: 600;
+        color: #34495e;
+        margin-bottom: 0.5rem;
+      }
+
+      .intro p {
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+      }
+
+      .container ol {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .container ol li {
+        list-style: none;
+        background-color: #f0f2f5;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        color: #444;
+        border: 1px solid #e0e0e0;
+      }
+
+      .chat-area {
+        display: flex;
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      #userInput {
+        flex-grow: 1;
+        border: none;
+        padding: 0.9rem 1rem;
+        font-size: 1rem;
+        background: #fdfdfd;
+        color: #333;
+      }
+
+      #userInput:focus {
+        outline: none;
+        background: #fff;
+      }
+
+      #input-btn {
+        border: none;
+        background: #764ba2;
+        color: white;
+        padding: 0 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      #input-btn:hover {
+        background: #667eea;
+      }
+
+      #errorMsg {
+        color: #e74c3c;
+        font-weight: 500;
+        margin-top: 1rem;
+        min-height: 1.2em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="intro">
+        <h1>Hi, I'm your AI Agent</h1>
+        <p>
+          I can help you with a few tasks. <br />Just type one of the commands
+          below to begin.
+        </p>
+        <ol>
+          <li>Chat</li>
+          <li>Mathematics</li>
+          <li>Search</li>
+        </ol>
+      </div>
+
+      <div class="chat-area">
+        <input
+          type="text"
+          id="userInput"
+          placeholder="Enter chat, mathematics or search...."
+        />
+        <button onclick="startAgent()" id="input-btn">Go</button>
+      </div>
+      <p id="errorMsg"></p>
+    </div>
+
+    <script>
+      function startAgent() {
+        let userValue = document.getElementById("userInput");
+        let checkValue = userValue.value.toLowerCase();
+        console.log(checkValue);
+
+        if (checkValue == "search") {
+          userValue.value = "";
+          window.location.href = "https://www.google.com/";
+        } 
+        else if (checkValue == "mathematics") {
+          userValue.value = "";
+          window.location.href = "calculator.html";
+        } 
+        else if (checkValue == "chat") {
+          userValue.value = "";
+          window.location.href = "chat.html";
+        } 
+        else {
+          let showMsg = document.getElementById("errorMsg");
+          userValue.value = "";
+          showMsg.innerHTML =
+            "Invalid command. Please type 'Chat', 'Mathematics', or 'Search'.";
+        }
+      }
+    </script>
+  </body>
+</html>

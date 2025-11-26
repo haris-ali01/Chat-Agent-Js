@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat App</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        text-align: center;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        flex-direction: column;
+        height: auto;
+        min-height: 85vh;
+        width: 1100px;
+        max-width: 95%;
+        background-color: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        padding: 1rem;
+        box-sizing: border-box;
+      }
+
+      .main-title {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+      }
+
+      #addUser {
+        display: none;
+        background-color: #050505;
+        position: absolute;
+        right: 30px;
+      }
+
+      h2 {
+        color: #4a4a4a;
+        margin-bottom: 1.5rem;
+      }
+
+      h3 {
+        font-weight: 500;
+        color: #666;
+      }
+
+      #intro {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      #user-names {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      input {
+        padding: 12px 15px;
+        border: 2px solid #eee;
+        border-radius: 8px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.3s;
+        width: 200px;
+      }
+
+      input:focus {
+        border-color: #764ba2;
+      }
+
+      button {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.2s, opacity 0.2s;
+        color: white;
+      }
+
+      button:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      #startBtn {
+        background-color: #667eea;
+      }
+
+      #chat-container {
+        height: 70vh;
+        display: none;
+        justify-content: space-between;
+        /* flex-direction: column; */
+        width: 100%;
+        /* background-color: #f9f9f9; */
+        border-radius: 15px;
+        /* padding: 20px; */
+        box-sizing: border-box;
+        border: 1px solid #eee;
+      }
+
+      .chat-users {
+        display: flex;
+        flex-direction: column;
+        background-color: #f5f4f4;
+        padding: 20px;
+        width: 30%;
+        border: transparent;
+      }
+
+      #selectUser {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background-color: #fff;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 14px;
+        color: #333;
+        outline: none;
+        cursor: pointer;
+      }
+
+      #selectUser:focus {
+        border-color: #764ba2;
+      }
+
+      #selectUser option {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 14px;
+        padding: 5px;
+        color: #333;
+      }
+
+      #DisplayUserChat {
+        list-style: none;
+        padding: 1px;
+        overflow-y: scroll;
+      }
+
+      .displayChat {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        list-style: none;
+        text-align: left;
+        padding: 10px 8px 10px 8px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .displayChat:hover {
+        background: linear-gradient(to right, #d2a8fc, #9badff);
+      }
+
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(to right, #764ba2, #667eea);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 8px;
+        font-weight: bold;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+
+      .message-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-color: #fffefe;
+        padding: 20px;
+        width: 70%;
+      }
+
+      /* Styles for the No Chat Placeholder */
+      #no-chat-placeholder {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        text-align: center;
+        color: #888;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      #chat-container .message-list {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        height: 100%;
+        overflow-y: auto;
+        padding-bottom: 1rem;
+        gap: 10px;
+        list-style: none;
+        padding-left: 0;
+      }
+
+      .recv-username {
+        font-weight: 600;
+        margin-right: 15px;
+        color: rgb(14, 94, 14);
+      }
+
+      .send-username {
+        font-weight: 600;
+        margin-right: 15px;
+        color: yellow;
+      }
+
+      .message-list li {
+        max-width: 44%;
+        width: fit-content;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column-reverse;
+        align-items: start;
+        text-wrap: wrap;
+        padding: 12px 16px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        word-break: break-word;
+        margin-bottom: 5px;
+        text-align: left;
+      }
+
+      .receiver-msg {
+        align-self: flex-start;
+        background-color: #e4e6eb;
+        color: #050505;
+        border-radius: 15px 15px 15px 0;
+      }
+
+      .sender-msg {
+        align-self: flex-end;
+        background: linear-gradient(to right, #764ba2, #667eea);
+        color: white;
+        border-radius: 15px 15px 0 15px;
+      }
+
+      #chat-container .message-box {
+        margin-top: 15px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        border-top: 1px solid #eee;
+        padding-top: 15px;
+      }
+
+      .message-box div {
+        display: flex;
+        width: 50%;
+        gap: 5px;
+        align-items: center;
+      }
+
+      #secondUserInput {
+        display: none;
+      }
+
+      .message-box input {
+        width: 100%;
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+
+      #receiverBtn {
+        background-color: #888;
+        padding: 10px 15px;
+      }
+
+      #secondReceiverBtn {
+        background-color: #888;
+        padding: 10px 15px;
+      }
+
+      #senderBtn {
+        background-color: #764ba2;
+        padding: 10px 15px;
+      }
+
+      #resetBtn {
+        margin-top: 20px;
+        background-color: transparent;
+        color: #ff6b6b;
+        border: 1px solid #ff6b6b;
+        padding: 8px 15px;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+
+      #resetBtn:hover {
+        background-color: #ff6b6b;
+        color: white;
+      }
+
+      #noUserError {
+        color: red;
+        font-size: 0.9rem;
+        margin-top: 10px;
+      }
+
+      .action-btn {
+        cursor: pointer;
+        margin-left: 3px;
+        font-size: 1rem;
+      }
+
+      .action-btn:hover {
+        opacity: 0.7;
+      }
+
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #aaa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="main-title">
+        <h2>Chat with your buddies!</h2>
+        <!-- <button id="addUser" onclick="addNewUser();">
+        <i class="fa-solid fa-plus"></i>&nbsp;Add User
+      </button> -->
+      </div>
+
+      <div id="intro">
+        <!-- <h3>Enter user details to start Chat</h3> -->
+        <div id="user-names">
+          <!-- <input id="receiver" placeholder="Enter receiver name.." /> -->
+          <button id="startBtn" onclick="startChat();">Start Chat</button>
+        </div>
+        <p id="noUserError"></p>
+        <button id="resetBtn" onclick="clearAllChat()">
+          Reset All Chat Data
+        </button>
+      </div>
+
+      <div id="chat-container">
+        <div class="chat-users">
+          <div>
+            <select id="selectUser">
+              <option value="" disabled selected>Select a user</option>
+            </select>
+          </div>
+
+          <ul id="DisplayUserChat"></ul>
+        </div>
+
+        <div class="message-container">
+          <!-- Show when there is no chat open -->
+          <div id="no-chat-placeholder">
+            <i
+              class="fa-solid fa-comments"
+              style="font-size: 50px; color: #ddd; margin-bottom: 20px"
+            ></i>
+            <h3>Welcome to Chat App</h3>
+            <p>Select a user from the left sidebar to start messaging.</p>
+          </div>
+
+          <!-- Message list -->
+          <ul id="chat-list" class="message-list"></ul>
+
+          <!-- Getting message from user -->
+          <div class="message-box">
+            <div>
+              <input id="receiverMsg" placeholder="Enter receiver message.." />
+              <button id="receiverBtn" onclick="receiveMsg();">Send</button>
+            </div>
+
+            <div id="secondUserInput">
+              <input
+                id="secondReceiverMsg"
+                placeholder="Enter second receiver message.."
+              />
+              <button id="secondReceiverBtn" onclick="receiveSecondMsg();">
+                Send
+              </button>
+            </div>
+
+            <div>
+              <input id="senderMsg" placeholder="Enter sender message.." />
+              <button id="senderBtn" onclick="sendMsg();">Send</button>
+            </div>
+          </div>
+          <button id="resetBtn" onclick="clearAllChat()">
+            Reset All Chat Data
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let messageArray = [];
+      let userArray = [];
+      let isEditing = false;
+      let editingMessageId = null;
+      let editingType = null;
+      let userId = null;
+      let activeChatId = 2;
+
+      let savedUser = JSON.parse(localStorage.getItem("User")) || [];
+      let savedSender;
+      let savedReceiver;
+      let savedReceiver2;
+
+      if (savedUser.length > 0) {
+        if (savedUser[0]) {
+          savedSender = savedUser[0].name;
+        }
+
+        if (savedUser[1]) {
+          savedReceiver = savedUser[1].name;
+        }
+
+        if (savedUser[2]) {
+          savedReceiver2 = savedUser[2].name;
+        }
+      }
+
+      if (savedUser[1]) {
+        startChat();
+      }
+
+      let gettingSend = document.getElementById("senderMsg");
+      gettingSend.addEventListener("keydown", function (e) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById("senderBtn").click();
+        }
+      });
+
+      let gettingRecv = document.getElementById("receiverMsg");
+      gettingRecv.addEventListener("keydown", function (e) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById("receiverBtn").click();
+        }
+      });
+
+      let gettingRecv2 = document.getElementById("secondReceiverMsg");
+      gettingRecv2.addEventListener("keydown", function (e) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById("secondReceiverBtn").click();
+        }
+      });
+
+      async function getUserData() {
+        const apiUrl = "https://jsonplaceholder.typicode.com/users";
+
+        try {
+          const response = await fetch(apiUrl);
+
+          if (!response.ok) {
+            throw new Error(`HTTP error. status: ${response.status}`);
+          }
+
+          const users = await response.json();
+          console.log("Fetched User Data", users);
+
+          const newUserData = users.map((item) => {
+            return { id: item.id, name: item.name };
+          });
+
+          console.log("User Specific Data: ", newUserData);
+          userArray.push(newUserData);
+          localStorage.setItem("User", JSON.stringify(newUserData));
+
+          startChat();
+        } catch (error) {
+          console.error("Error fetching users;", error);
+        }
+      }
+
+      function userDisplay() {
+        let selectElement = document.getElementById("selectUser");
+
+        let filteredUsers = userArray.filter((user) => user.id > 1);
+
+        filteredUsers.forEach((item) => {
+          const option = document.createElement("option");
+          option.value = item.id;
+          option.textContent = item.name;
+          selectElement.appendChild(option);
+        });
+
+        selectElement.addEventListener("change", function () {
+          if (!this.value) return;
+
+          activeChatId = Number(this.value);
+          console.log("active chat id: ", activeChatId);
+          loadStoredMessages();
+        });
+      }
+
+      userDisplay();
+
+      function displayChat() {
+        let selectElement = document.getElementById("DisplayUserChat");
+
+        let msgArray = JSON.parse(localStorage.getItem("Messages")) || [];
+
+        let filteredUsers = userArray.filter((user) => user.id > 1);
+
+        filteredUsers.forEach((item) => {
+          for (let i = 0; i < msgArray.length; i++) {
+            if (item.id === msgArray[i].user_id) {
+              const chat = document.createElement("li");
+              chat.classList.add("displayChat");
+
+              chat.onclick = function () {
+                activeChatId = item.id;
+
+                loadStoredMessages();
+              };
+
+              const initials = item.name.substring(0, 2).toUpperCase();
+
+              const avatar = document.createElement("div");
+              avatar.classList.add("avatar");
+              avatar.textContent = initials;
+
+              const nameSpan = document.createElement("span");
+              nameSpan.textContent = item.name;
+
+              chat.appendChild(avatar);
+              chat.append(nameSpan);
+              selectElement.appendChild(chat);
+            }
+          }
+        });
+      }
+
+      displayChat();
+
+      function startChat() {
+        userArray = JSON.parse(localStorage.getItem("User")) || [];
+
+        if (userArray.length === 0) {
+          getUserData();
+        }
+
+        if (userArray.length !== 0) {
+          if (userArray[0].name !== "Haris") {
+            const sender = {
+              id: 1,
+              name: "Haris",
+            };
+
+            userArray = userArray.map((item) => {
+              if (item.id >= sender.id) {
+                return { ...item, id: item.id + 1 };
+              }
+              return item;
+            });
+            userArray.unshift(sender);
+
+            //   const receiver = {
+            //     id: 2,
+            //     name: receiverInput,
+            //   };
+            //   userArray.push(receiver);
+            // } else {
+            //   if (userArray[1]) {
+            //     userArray[1].name = receiverInput;
+            //   }
+          }
+
+          localStorage.setItem("User", JSON.stringify(userArray));
+
+          // if (userArray.length > 2) {
+          //   document.getElementById("secondUserInput").style.display = "flex";
+          // }
+
+          document.getElementById("chat-container").style.display = "flex";
+          document.getElementById("intro").style.display = "none";
+
+          // if (savedUser.length > 2) {
+          //   document.getElementById("addUser").style.display = "none";
+          // } else {
+          //   document.getElementById("addUser").style.display = "inline";
+          // }
+
+          loadStoredMessages();
+        }
+        // else {
+        //   document.getElementById("noUserError").textContent =
+        //     "Please enter sender and receiver names.";
+        // }
+      }
+
+      function addNewUser() {
+        let setNewRecv = prompt("Enter Receiver name: ");
+
+        if (setNewRecv !== null) {
+          const receiver2 = {
+            id: 3,
+            name: setNewRecv,
+          };
+          userArray.push(receiver2);
+
+          localStorage.setItem("User", JSON.stringify(userArray));
+          location.reload();
+        }
+      }
+
+      function generateMsgId() {
+        return Math.floor(Math.random() * (99999999 - 10000000 + 1)) + 10000000;
+      }
+
+      function receiveMsg() {
+        let inputEl = document.getElementById("receiverMsg");
+        let msg = inputEl.value;
+
+        if (!activeChatId) return;
+
+        if (msg !== "") {
+          if (isEditing && userId === activeChatId) {
+            let allMessages =
+              JSON.parse(localStorage.getItem("Messages")) || [];
+            let updatedMessages = allMessages.map(function (item) {
+              if (item.id === editingMessageId) {
+                item.message = msg;
+              }
+              return item;
+            });
+            localStorage.setItem("Messages", JSON.stringify(updatedMessages));
+            isEditing = false;
+            editingMessageId = null;
+            editingType = null;
+            userId = null;
+            document.getElementById("receiverBtn").textContent = "Send";
+            inputEl.value = "";
+            loadStoredMessages();
+            return;
+          }
+
+          let list = document.getElementById("chat-list");
+
+          let currentUser = userArray.find((u) => u.id === activeChatId);
+          const recvMessageObj = {
+            user_id: currentUser.id,
+            conversationId: activeChatId,
+            status: "receiver",
+            name: currentUser.name,
+            message: msg,
+          };
+          recvMessageObj.id = generateMsgId();
+          messageArray.push(recvMessageObj);
+
+          let li = document.createElement("li");
+          li.classList.add("receiver-msg");
+
+          let textSpan = document.createElement("span");
+          textSpan.textContent = recvMessageObj.message;
+          li.appendChild(textSpan);
+
+          let iconsDiv = document.createElement("div");
+          iconsDiv.style.display = "none";
+
+          let editIcon = document.createElement("span");
+          editIcon.innerHTML = "&#9998;";
+          editIcon.className = "action-btn";
+
+          editIcon.addEventListener("click", function (e) {
+            isEditing = true;
+            editingMessageId = recvMessageObj.id;
+            editingType = "receiver";
+            userId = recvMessageObj.user_id;
+            inputEl.value = recvMessageObj.message;
+            inputEl.focus();
+            document.getElementById("receiverBtn").textContent = "Update";
+          });
+
+          let deleteIcon = document.createElement("span");
+          deleteIcon.innerHTML = "&#128465;";
+          deleteIcon.className = "action-btn";
+          deleteIcon.onclick = function () {
+            let allMessages =
+              JSON.parse(localStorage.getItem("Messages")) || [];
+            let updatedMessages = allMessages.filter(
+              (item) => item.id !== recvMessageObj.id
+            );
+            localStorage.setItem("Messages", JSON.stringify(updatedMessages));
+            loadStoredMessages();
+          };
+
+          let showUserName = document.createElement("div");
+          showUserName.textContent = recvMessageObj.name;
+          showUserName.classList.add("recv-username");
+
+          let showMessage = document.createElement("div");
+          showMessage.style.display = "flex";
+          showMessage.style.justifyContent = "space-between";
+
+          showMessage.appendChild(showUserName);
+          iconsDiv.appendChild(editIcon);
+          iconsDiv.appendChild(deleteIcon);
+          showMessage.appendChild(iconsDiv);
+
+          li.appendChild(showMessage);
+
+          li.addEventListener("mouseover", function (e) {
+            iconsDiv.style.display = "flex";
+          });
+          li.addEventListener("mouseout", function (e) {
+            iconsDiv.style.display = "none";
+          });
+
+          list.appendChild(li);
+          saveMessage("Messages", recvMessageObj);
+          inputEl.value = "";
+
+          list.scrollTop = list.scrollHeight;
+        }
+      }
+
+      function receiveSecondMsg() {
+        let inputEl = document.getElementById("secondReceiverMsg");
+        let msg = inputEl.value;
+
+        if (msg !== "") {
+          if (isEditing && userId === savedUser[2].id) {
+            let allMessages =
+              JSON.parse(localStorage.getItem("Messages")) || [];
+            let updatedMessages = allMessages.map(function (item) {
+              if (item.id === editingMessageId) {
+                item.message = msg;
+              }
+              return item;
+            });
+            localStorage.setItem("Messages", JSON.stringify(updatedMessages));
+            isEditing = false;
+            editingMessageId = null;
+            editingType = null;
+            userId = null;
+            document.getElementById("receiverBtn").textContent = "Send";
+            inputEl.value = "";
+            loadStoredMessages();
+            return;
+          }
+
+          let list = document.getElementById("chat-list");
+          const recvMessageObj2 = {
+            user_id: savedUser[2].id,
+            status: "receiver2",
+            name: savedReceiver2,
+            message: msg,
+          };
+          recvMessageObj2.id = generateMsgId();
+          messageArray.push(recvMessageObj2);
+
+          let li = document.createElement("li");
+          li.classList.add("receiver-msg");
+
+          let textSpan = document.createElement("span");
+          textSpan.textContent = recvMessageObj2.message;
+          li.appendChild(textSpan);
+
+          let iconsDiv = document.createElement("div");
+          iconsDiv.style.display = "none";
+
+          let editIcon = document.createElement("span");
+          editIcon.innerHTML = "&#9998;";
+          editIcon.className = "action-btn";
+
+          editIcon.addEventListener("click", function (e) {
+            isEditing = true;
+            editingMessageId = recvMessageObj2.id;
+            editingType = "receiver";
+            userId = recvMessageObj2.user_id;
+            inputEl.value = recvMessageObj2.message;
+            inputEl.focus();
+            document.getElementById("secondReceiverBtn").textContent = "Update";
+          });
+
+          let deleteIcon = document.createElement("span");
+          deleteIcon.innerHTML = "&#128465;";
+          deleteIcon.className = "action-btn";
+          deleteIcon.onclick = function () {
+            let allMessages =
+              JSON.parse(localStorage.getItem("Messages")) || [];
+            let updatedMessages = allMessages.filter(
+              (item) => item.id !== recvMessageObj2.id
+            );
+            localStorage.setItem("Messages", JSON.stringify(updatedMessages));
+            loadStoredMessages();
+          };
+
+          let showUserName = document.createElement("div");
+          showUserName.textContent = recvMessageObj2.name;
+          showUserName.classList.add("recv-username");
+          let showMessage = document.createElement("div");
+          showMessage.style.display = "flex";
+          showMessage.style.justifyContent = "space-between";
+
+          showMessage.appendChild(showUserName);
+          iconsDiv.appendChild(editIcon);
+          iconsDiv.appendChild(deleteIcon);
+          showMessage.appendChild(iconsDiv);
+
+          li.appendChild(showMessage);
+
+          li.addEventListener("mouseover", function (e) {
+            iconsDiv.style.display = "flex";
+          });
+          li.addEventListener("mouseout", function (e) {
+            iconsDiv.style.display = "none";
+          });
+
+          list.appendChild(li);
+          saveMessage("Messages", recvMessageObj2);
+          inputEl.value = "";
+
+          list.scrollTop = list.scrollHeight;
+        }
+      }
+
+      function sendMsg() {
+        let inputEl = document.getElementById("senderMsg");
+        let msg = inputEl.value;
+
+        if (!activeChatId) return;
+
+        if (msg !== "") {
+          if (isEditing && userId === savedUser[0].id) {
+            let allMessages =
+              JSON.parse(localStorage.getItem("Messages")) || [];
+            let updatedMessages = allMessages.map(function (item) {
+              if (item.id === editingMessageId) {
+                item.message = msg;
+              }
+              return item;
+            });
+            localStorage.setItem("Messages", JSON.stringify(updatedMessages));
+            isEditing = false;
+            editingMessageId = null;
+            editingType = null;
+            userId = null;
+            document.getElementById("senderBtn").textContent = "Send";
+            inputEl.value = "";
+            loadStoredMessages();
+            return;
+          }
+
+          let list = document.getElementById("chat-list");
+          const sendMessageObj = {
+            user_id: savedUser[0].id,
+            conversationId: activeChatId,
+            status: "sender",
+            name: savedSender,
+            message: msg,
+          };
+          sendMessageObj.id = generateMsgId();
+          messageArray.push(sendMessageObj);
+
+          let li = document.createElement("li");
+          li.classList.add("sender-msg");
+
+          let textSpan = document.createElement("span");
+          textSpan.textContent = sendMessageObj.message;
+          li.appendChild(textSpan);
+
+          let iconsDiv = document.createElement("div");
+          iconsDiv.style.display = "none";
+
+          let editIcon = document.createElement("span");
+          editIcon.innerHTML = "&#9998;";
+          editIcon.className = "action-btn";
+
+          editIcon.addEventListener("click", function (e) {
+            isEditing = true;
+            editingMessageId = sendMessageObj.id;
+            editingType = "sender";
+            userId = sendMessageObj.user_id;
+            inputEl.value = sendMessageObj.message;
+            inputEl.focus();
+            document.getElementById("senderBtn").textContent = "Update";
+          });
+
+          let deleteIcon = document.createElement("span");
+          deleteIcon.innerHTML = "&#128465;";
+          deleteIcon.className = "action-btn";
+          deleteIcon.onclick = function () {
+            let allMessages =
+              JSON.parse(localStorage.getItem("Messages")) || [];
+            let updatedMessages = allMessages.filter(
+              (item) => item.id !== sendMessageObj.id
+            );
+            localStorage.setItem("Messages", JSON.stringify(updatedMessages));
+            loadStoredMessages();
+          };
+
+          let showUserName = document.createElement("div");
+          showUserName.textContent = sendMessageObj.name;
+          showUserName.classList.add("send-username");
+
+          let showMessage = document.createElement("div");
+          showMessage.style.display = "flex";
+          showMessage.style.justifyContent = "space-between";
+
+          showMessage.appendChild(showUserName);
+          iconsDiv.appendChild(editIcon);
+          iconsDiv.appendChild(deleteIcon);
+          showMessage.appendChild(iconsDiv);
+
+          li.appendChild(showMessage);
+
+          li.addEventListener("mouseover", function (e) {
+            iconsDiv.style.display = "flex";
+          });
+          li.addEventListener("mouseout", function (e) {
+            iconsDiv.style.display = "none";
+          });
+
+          list.appendChild(li);
+          saveMessage("Messages", sendMessageObj);
+          inputEl.value = "";
+
+          list.scrollTop = list.scrollHeight;
+        }
+      }
+
+      function saveMessage(key, msg) {
+        let existing = JSON.parse(localStorage.getItem(key)) || [];
+        existing.push(msg);
+        localStorage.setItem(key, JSON.stringify(existing));
+      }
+
+      function loadStoredMessages() {
+        let allMessages = JSON.parse(localStorage.getItem("Messages")) || [];
+        let chatMessages = allMessages.filter(
+          (msg) => msg.conversationId === activeChatId
+        );
+
+        let placeholder = document.getElementById("no-chat-placeholder");
+        let msgBox = document.querySelector(".message-box");
+        let list = document.getElementById("chat-list");
+
+        if (activeChatId === null) {
+          // No user selected: Show Placeholder, Hide Chat
+          placeholder.style.display = "flex";
+          list.style.display = "none";
+          msgBox.style.display = "none";
+          return; // Stop here
+        } else {
+          // User selected: Hide Placeholder, Show Chat
+          placeholder.style.display = "none";
+          list.style.display = "flex";
+          msgBox.style.display = "flex";
+        }
+
+        list.innerHTML = "";
+
+        for (let msg of chatMessages) {
+          let li = document.createElement("li");
+          if (msg.user_id == savedUser[0].id) {
+            li.classList.add("sender-msg");
+          } else {
+            li.classList.add("receiver-msg");
+          }
+
+          let textSpan = document.createElement("span");
+          textSpan.textContent = msg.message;
+          li.appendChild(textSpan);
+
+          let iconsDiv = document.createElement("div");
+          iconsDiv.style.display = "none";
+
+          let editIcon = document.createElement("span");
+          editIcon.innerHTML = "&#9998;";
+          editIcon.className = "action-btn";
+
+          editIcon.addEventListener("click", function (e) {
+            isEditing = true;
+            userId = msg.user_id;
+            editingMessageId = msg.id;
+            editingType = msg.status;
+
+            if (msg.user_id == savedUser[0].id) {
+              let input = document.getElementById("senderMsg");
+              input.value = msg.message;
+              input.focus();
+              document.getElementById("senderBtn").textContent = "Update";
+            } else if (msg.user_id == activeChatId) {
+              let input = document.getElementById("receiverMsg");
+              input.value = msg.message;
+              input.focus();
+              document.getElementById("receiverBtn").textContent = "Update";
+            }
+            //  else {
+            //   let input = document.getElementById("secondReceiverMsg");
+            //   input.value = msg.message;
+            //   input.focus();
+            //   document.getElementById("secondReceiverBtn").textContent =
+            //     "Update";
+            // }
+          });
+
+          let deleteIcon = document.createElement("span");
+          deleteIcon.innerHTML = "&#128465;";
+          deleteIcon.className = "action-btn";
+          deleteIcon.onclick = function () {
+            let allMessages =
+              JSON.parse(localStorage.getItem("Messages")) || [];
+            let updatedMessages = allMessages.filter(
+              (item) => item.id !== msg.id
+            );
+            localStorage.setItem("Messages", JSON.stringify(updatedMessages));
+            loadStoredMessages();
+          };
+
+          let showUserName = document.createElement("div");
+          showUserName.textContent = msg.name;
+          showUserName.style.width = "100%";
+          if (msg.status == "receiver" || "receiver2") {
+            showUserName.classList.add("recv-username");
+          }
+          if (msg.status == "sender") {
+            showUserName.classList.add("send-username");
+          }
+
+          let showMessage = document.createElement("div");
+          showMessage.style.display = "flex";
+          showMessage.style.justifyContent = "space-between";
+
+          showMessage.appendChild(showUserName);
+          iconsDiv.appendChild(editIcon);
+          iconsDiv.appendChild(deleteIcon);
+          showMessage.appendChild(iconsDiv);
+
+          li.appendChild(showMessage);
+
+          li.addEventListener("mouseover", function (e) {
+            iconsDiv.style.display = "flex";
+          });
+          li.addEventListener("mouseout", function (e) {
+            iconsDiv.style.display = "none";
+          });
+
+          list.appendChild(li);
+        }
+
+        list.scrollTop = list.scrollHeight;
+      }
+
+      function clearAllChat() {
+        localStorage.clear();
+        location.reload();
+      }
+    </script>
+  </body>
+</html>

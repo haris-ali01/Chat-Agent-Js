@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Chronos | Alarm & World Clock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS VARIABLES & THEME --- */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --panel-bg: #334155;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+            --border: #334155;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --panel-bg: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #cbd5e1;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- RESET & LAYOUT --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            padding: 1rem;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 600px; /* Slightly wider for date input */
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        /* --- HEADER & TABS --- */
+        .app-header {
+            padding: 1.5rem 2rem 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo { font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .logo span { color: var(--primary); }
+
+        .header-actions { display: flex; gap: 0.5rem; }
+
+        .icon-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; transition: color 0.2s; padding: 0.5rem; border-radius: 50%; }
+        .icon-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+        
+        #test-sound-btn:active { color: var(--success); transform: scale(0.95); }
+
+        .nav-tabs {
+            display: flex;
+            padding: 0 2rem;
+            margin-top: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            gap: 2rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding-bottom: 1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+        }
+
+        .tab-btn.active { color: var(--primary); }
+        .tab-btn.active::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--primary);
+        }
+
+        /* --- CONTENT AREAS --- */
+        .tab-content { padding: 2rem; overflow-y: auto; height: 100%; }
+        .hidden { display: none !important; }
+
+        /* --- CLOCK FACE --- */
+        .clock-face { text-align: center; margin-bottom: 2rem; }
+        .time-display {
+            font-family: var(--font-mono);
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--text-main) 0%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .date-display { color: var(--text-muted); margin-top: 0.5rem; font-weight: 500; }
+
+        /* --- ALARM CONTROLS --- */
+        .input-group {
+            display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+            background: var(--bg-color); padding: 0.5rem;
+            border-radius: 12px; border: 1px solid var(--border);
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+        input { background: transparent; border: none; color: var(--text-main); padding: 0.5rem; outline: none; font-family: var(--font-main); }
+        
+        /* Specific Input Styles */
+        input[type="time"], input[type="date"] { 
+            font-family: var(--font-mono); cursor: pointer; 
+            background: rgba(255,255,255,0.05); border-radius: 6px;
+        }
+        input[type="time"]::-webkit-calendar-picker-indicator,
+        input[type="date"]::-webkit-calendar-picker-indicator { 
+            filter: invert(1); cursor: pointer; 
+        }
+        [data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator,
+        [data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator { 
+            filter: invert(0); 
+        }
+        
+        #alarm-label-input { flex-grow: 1; min-width: 120px; }
+
+        .primary-btn {
+            background: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem;
+            border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;
+        }
+        .primary-btn:hover { background: var(--primary-hover); }
+
+        /* --- LIST ITEMS (Alarm & World Clock) --- */
+        .list-header { font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; letter-spacing: 0.05em; }
+        .items-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+
+        .list-item {
+            background: var(--bg-color); padding: 1rem; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid var(--border); animation: slideIn 0.3s ease-out;
+        }
+
+        .item-info { display: flex; flex-direction: column; }
+        .item-main-text { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 700; display: flex; align-items: baseline; gap: 0.5rem; }
+        .item-sub-text { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;}
+        
+        .alarm-date-badge {
+            font-family: var(--font-main);
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* World Clock Specifics */
+        .world-clock-item .item-main-text { font-size: 1rem; font-family: var(--font-main); }
+        .world-clock-item .item-time { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+
+        .delete-btn { background: none; border: none; color: var(--danger); cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
+        .delete-btn:hover { opacity: 1; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- SWITCH TOGGLE --- */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* --- WORLD CLOCK ADD --- */
+        .add-city-wrapper { margin-bottom: 1.5rem; display: flex; gap: 0.5rem; }
+        select {
+            flex-grow: 1; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border);
+            border-radius: 8px; padding: 0.6rem; outline: none; cursor: pointer;
+        }
+
+        /* --- DIALOG --- */
+        dialog {
+            background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border);
+            border-radius: 24px; padding: 2rem; margin: auto; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); width: 90%; max-width: 400px;
+        }
+        dialog::backdrop { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
+        
+        .ring-animation { color: var(--primary); animation: ring 1s infinite; margin-bottom: 1rem; }
+        @keyframes ring { 0% { transform: rotate(0deg); } 25% { transform: rotate(-15deg); } 75% { transform: rotate(15deg); } 100% { transform: rotate(0deg); } }
+        
+        .dialog-actions { display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: center; }
+        .secondary-btn { background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; }
+        .danger-btn { background: var(--danger); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; cursor: pointer; }
+
+        .empty-state { text-align: center; color: var(--text-muted); font-style: italic; padding: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Chronos<span>Enterprise</span>
+            </div>
+            <div class="header-actions">
+                <button id="test-sound-btn" class="icon-btn" aria-label="Test Audio" title="Test Alarm Sound">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                </button>
+                <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode" title="Toggle Theme">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-target="alarm-view">Alarm Clock</button>
+            <button class="tab-btn" data-target="world-view">World Clock</button>
+        </nav>
+
+        <main id="alarm-view" class="tab-content">
+            <section class="clock-face">
+                <div class="time-display" id="current-time">00:00:00</div>
+                <div class="date-display" id="current-date">Loading...</div>
+            </section>
+
+            <div class="input-group">
+                <input type="date" id="alarm-date-input" title="Leave empty for Daily Alarm">
+                <input type="time" id="alarm-time-input" required>
+                <input type="text" id="alarm-label-input" placeholder="Label" autocomplete="off">
+                <button id="add-alarm-btn" class="primary-btn">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Set
+                </button>
+            </div>
+
+            <h3 class="list-header">Your Alarms</h3>
+            <ul id="alarms-list" class="items-list"></ul>
+            <div id="alarm-empty" class="empty-state hidden">No active alarms set</div>
+        </main>
+
+        <main id="world-view" class="tab-content hidden">
+            <div class="add-city-wrapper">
+                <select id="timezone-select">
+                    <option value="" disabled selected>Select a city to add...</option>
+                    <option value="America/New_York">New York (EST)</option>
+                    <option value="Europe/London">London (GMT)</option>
+                    <option value="Europe/Paris">Paris (CET)</option>
+                    <option value="Asia/Dubai">Dubai (GST)</option>
+                    <option value="Asia/Karachi">Karachi (PKT)</option>
+                    <option value="Asia/Tokyo">Tokyo (JST)</option>
+                    <option value="Australia/Sydney">Sydney (AEDT)</option>
+                    <option value="America/Los_Angeles">Los Angeles (PST)</option>
+                    <option value="Asia/Singapore">Singapore (SGT)</option>
+                </select>
+                <button id="add-city-btn" class="primary-btn">Add</button>
+            </div>
+
+            <h3 class="list-header">Tracked Cities</h3>
+            <ul id="world-list" class="items-list"></ul>
+            <div id="world-empty" class="empty-state hidden">No cities added yet</div>
+        </main>
+    </div>
+
+    <dialog id="alarm-dialog">
+        <div class="alarm-ring-content">
+            <div class="ring-animation">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <h2 id="ring-label" style="margin-bottom: 0.5rem;">Alarm</h2>
+            <p id="ring-time" style="font-family: var(--font-mono); font-size: 1.5rem;">00:00</p>
+            <div class="dialog-actions">
+                <button id="snooze-btn" class="secondary-btn">Snooze (5m)</button>
+                <button id="dismiss-btn" class="danger-btn">Dismiss</button>
+            </div>
+        </div>
+    </dialog>
+
+    <script>
+        // Sound Manager using Web Audio API (No external files)
+        class SoundEngine {
+            constructor() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.interval = null;
+                this.isPlaying = false;
+            }
+
+            async ensureContext() {
+                if (this.ctx.state === 'suspended') {
+                    await this.ctx.resume();
+                }
+            }
+
+            playBeep() {
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                // Sound Configuration (Digital Alarm Beep)
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(880, this.ctx.currentTime); 
+                osc.frequency.setValueAtTime(1760, this.ctx.currentTime + 0.1); 
+
+                // Envelope
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.1, this.ctx.currentTime + 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 0.5);
+
+                osc.start(this.ctx.currentTime);
+                osc.stop(this.ctx.currentTime + 0.5);
+            }
+
+            startAlarm() {
+                if (this.isPlaying) return;
+                this.ensureContext();
+                this.isPlaying = true;
+                this.playBeep();
+                this.interval = setInterval(() => {
+                    this.playBeep();
+                }, 1000);
+            }
+
+            stopAlarm() {
+                this.isPlaying = false;
+                if (this.interval) {
+                    clearInterval(this.interval);
+                    this.interval = null;
+                }
+            }
+        }
+
+        class EnterpriseClock {
+            constructor() {
+                // State
+                this.alarms = JSON.parse(localStorage.getItem('alarms')) || [];
+                this.cities = JSON.parse(localStorage.getItem('cities')) || [];
+                this.soundEngine = new SoundEngine();
+                this.activeAlarmId = null;
+
+                // DOM Elements
+                this.els = {
+                    time: document.getElementById('current-time'),
+                    date: document.getElementById('current-date'),
+                    alarmList: document.getElementById('alarms-list'),
+                    worldList: document.getElementById('world-list'),
+                    alarmEmpty: document.getElementById('alarm-empty'),
+                    worldEmpty: document.getElementById('world-empty'),
+                    dialog: document.getElementById('alarm-dialog'),
+                    themeBtn: document.getElementById('theme-toggle'),
+                    testSoundBtn: document.getElementById('test-sound-btn'),
+                    tabs: document.querySelectorAll('.tab-btn'),
+                    views: document.querySelectorAll('.tab-content')
+                };
+
+                this.init();
+            }
+
+            init() {
+                // Start Ticks
+                this.updateLocalTime();
+                this.updateWorldTimes();
+                setInterval(() => {
+                    this.updateLocalTime();
+                    this.updateWorldTimes();
+                }, 1000);
+
+                // Event Listeners
+                this.els.themeBtn.addEventListener('click', () => this.toggleTheme());
+                
+                this.els.testSoundBtn.addEventListener('click', () => {
+                    this.soundEngine.startAlarm();
+                    setTimeout(() => this.soundEngine.stopAlarm(), 2000);
+                });
+
+                this.els.tabs.forEach(tab => {
+                    tab.addEventListener('click', (e) => this.switchTab(e.target));
+                });
+
+                document.getElementById('add-alarm-btn').addEventListener('click', () => this.addAlarm());
+                document.getElementById('add-city-btn').addEventListener('click', () => this.addCity());
+                document.getElementById('dismiss-btn').addEventListener('click', () => this.stopAlarm());
+                document.getElementById('snooze-btn').addEventListener('click', () => this.snoozeAlarm());
+
+                this.renderAlarms();
+                this.renderCities();
+
+                // Audio Unlock
+                document.body.addEventListener('click', () => {
+                    this.soundEngine.ensureContext();
+                }, { once: true });
+            }
+
+            switchTab(clickedTab) {
+                this.els.tabs.forEach(t => t.classList.remove('active'));
+                clickedTab.classList.add('active');
+                const targetId = clickedTab.dataset.target;
+                this.els.views.forEach(view => {
+                    if(view.id === targetId) view.classList.remove('hidden');
+                    else view.classList.add('hidden');
+                });
+            }
+
+            updateLocalTime() {
+                const now = new Date();
+                this.els.time.textContent = now.toLocaleTimeString('en-US', { hour12: true });
+                this.els.date.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+                // Alarm Trigger Check
+                if (now.getSeconds() === 0) {
+                    const currentHM = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+                    const currentDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
+
+                    this.alarms.forEach(alarm => {
+                        if (!alarm.isActive) return;
+
+                        // Check Time
+                        if (alarm.time === currentHM) {
+                            // Check Date (If set) or if it's a daily alarm
+                            if (!alarm.date || alarm.date === currentDate) {
+                                this.triggerAlarm(alarm);
+                            }
+                        }
+                    });
+                }
+            }
+
+            addAlarm() {
+                const dateInput = document.getElementById('alarm-date-input');
+                const timeInput = document.getElementById('alarm-time-input');
+                const labelInput = document.getElementById('alarm-label-input');
+                
+                if (!timeInput.value) return alert('Select a time');
+
+                this.alarms.push({
+                    id: Date.now(),
+                    date: dateInput.value || null, // Optional Date
+                    time: timeInput.value,
+                    label: labelInput.value || 'Alarm',
+                    isActive: true
+                });
+
+                dateInput.value = '';
+                timeInput.value = '';
+                labelInput.value = '';
+                this.saveData();
+                this.renderAlarms();
+            }
+
+            renderAlarms() {
+                this.els.alarmList.innerHTML = '';
+                if (this.alarms.length === 0) this.els.alarmEmpty.classList.remove('hidden');
+                else {
+                    this.els.alarmEmpty.classList.add('hidden');
+                    
+                    // Sort: Date (nulls last/daily) then Time
+                    this.alarms.sort((a, b) => {
+                        if (a.date && !b.date) return -1;
+                        if (!a.date && b.date) return 1;
+                        if (a.date && b.date) {
+                            const dateDiff = a.date.localeCompare(b.date);
+                            if (dateDiff !== 0) return dateDiff;
+                        }
+                        return a.time.localeCompare(b.time);
+                    });
+
+                    this.alarms.forEach(alarm => {
+                        const li = document.createElement('li');
+                        li.className = 'list-item';
+                        
+                        // Determine badge text
+                        const badge = alarm.date ? new Date(alarm.date).toLocaleDateString(undefined, {month:'short', day:'numeric'}) : 'Daily';
+
+                        li.innerHTML = `
+                            <div class="item-info">
+                                <span class="item-main-text">
+                                    ${this.formatDisplayTime(alarm.time)}
+                                    <span class="alarm-date-badge">${badge}</span>
+                                </span>
+                                <span class="item-sub-text">${alarm.label}</span>
+                            </div>
+                            <div style="display:flex; gap:1rem; align-items:center;">
+                                <label class="switch">
+                                    <input type="checkbox" ${alarm.isActive ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                                <button class="delete-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                            </div>
+                        `;
+                        
+                        li.querySelector('input').addEventListener('change', () => {
+                            alarm.isActive = !alarm.isActive;
+                            this.saveData();
+                        });
+                        li.querySelector('.delete-btn').addEventListener('click', () => {
+                            this.alarms = this.alarms.filter(a => a.id !== alarm.id);
+                            this.saveData();
+                            this.renderAlarms();
+                        });
+
+                        this.els.alarmList.appendChild(li);
+                    });
+                }
+            }
+
+            addCity() {
+                const select = document.getElementById('timezone-select');
+                const zone = select.value;
+                if (!zone) return;
+                
+                if (this.cities.some(c => c.zone === zone)) return alert('City already added');
+
+                const name = select.options[select.selectedIndex].text.split('(')[0].trim();
+                this.cities.push({ id: Date.now(), name, zone });
+                
+                select.selectedIndex = 0;
+                this.saveData();
+                this.renderCities();
+            }
+
+            renderCities() {
+                this.els.worldList.innerHTML = '';
+                if (this.cities.length === 0) this.els.worldEmpty.classList.remove('hidden');
+                else {
+                    this.els.worldEmpty.classList.add('hidden');
+                    this.cities.forEach(city => {
+                        const li = document.createElement('li');
+                        li.className = 'list-item world-clock-item';
+                        li.id = `city-${city.id}`;
+                        li.innerHTML = `
+                            <div class="item-info">
+                                <span class="item-main-text">${city.name}</span>
+                                <span class="item-sub-text" id="date-${city.id}">Loading...</span>
+                            </div>
+                            <div style="display:flex; gap:1rem; align-items:center;">
+                                <span class="item-time" id="time-${city.id}">00:00</span>
+                                <button class="delete-btn"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                            </div>
+                        `;
+
+                        li.querySelector('.delete-btn').addEventListener('click', () => {
+                            this.cities = this.cities.filter(c => c.id !== city.id);
+                            this.saveData();
+                            this.renderCities();
+                        });
+
+                        this.els.worldList.appendChild(li);
+                    });
+                    this.updateWorldTimes();
+                }
+            }
+
+            updateWorldTimes() {
+                const now = new Date();
+                this.cities.forEach(city => {
+                    const timeEl = document.getElementById(`time-${city.id}`);
+                    const dateEl = document.getElementById(`date-${city.id}`);
+                    if(timeEl && dateEl) {
+                        try {
+                            timeEl.textContent = now.toLocaleTimeString('en-US', { 
+                                timeZone: city.zone, hour: 'numeric', minute: '2-digit', hour12: true 
+                            });
+                            dateEl.textContent = now.toLocaleDateString('en-US', { 
+                                timeZone: city.zone, weekday: 'short', month: 'short', day: 'numeric' 
+                            });
+                        } catch (e) { timeEl.textContent = "Error"; }
+                    }
+                });
+            }
+
+            formatDisplayTime(time24) {
+                const [h, m] = time24.split(':');
+                const date = new Date();
+                date.setHours(h, m);
+                return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            }
+
+            saveData() {
+                localStorage.setItem('alarms', JSON.stringify(this.alarms));
+                localStorage.setItem('cities', JSON.stringify(this.cities));
+            }
+
+            toggleTheme() {
+                const body = document.body;
+                if (body.getAttribute('data-theme') === 'light') body.removeAttribute('data-theme');
+                else body.setAttribute('data-theme', 'light');
+            }
+
+            triggerAlarm(alarm) {
+                if (this.activeAlarmId === alarm.id) return;
+                
+                this.activeAlarmId = alarm.id;
+                this.soundEngine.startAlarm();
+                
+                // If it was a one-time date alarm, disable it
+                if (alarm.date) {
+                    alarm.isActive = false;
+                    this.saveData();
+                    this.renderAlarms();
+                }
+
+                document.getElementById('ring-time').textContent = this.formatDisplayTime(alarm.time);
+                document.getElementById('ring-label').textContent = alarm.label;
+                this.els.dialog.showModal();
+            }
+
+            stopAlarm() {
+                this.soundEngine.stopAlarm();
+                this.els.dialog.close();
+                this.activeAlarmId = null;
+            }
+
+            snoozeAlarm() {
+                this.stopAlarm();
+                setTimeout(() => {
+                    this.soundEngine.startAlarm();
+                    this.els.dialog.showModal();
+                }, 300000);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => new EnterpriseClock());
+    </script>
+</body>
+</html>

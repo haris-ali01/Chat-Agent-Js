@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator</title>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+      }
+
+      .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        width: 300px;
+        border: 1px solid black;
+        border-radius: 0.5rem;
+        padding: 1rem;
+      }
+
+      .container h2{
+        margin-bottom: 2rem;
+        padding: 1rem;
+        border-bottom: 1px solid grey;
+      }
+
+      .container .cal {
+        width: 270px;
+      }
+
+      .container .inputs {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+      }
+
+      .container .inputs input {
+        padding: 0.5rem;
+        width: 3rem;
+        border: 2px solid cadetblue;
+      }
+
+      .container .cal-buttons button {
+        font-size: 1.5rem;
+        padding: 0.5rem 0.7rem;
+        border-radius: 0.5rem;
+        background-color: cadetblue;
+      }
+
+      .container .result {
+        margin-top: 2.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .container .result input {
+        padding: 0.5rem 0.5rem;
+        font-size: 1rem;
+        width: 3rem;
+        border: 2px solid cadetblue;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h2>Simple Calculator</h2>
+      <div class="cal">
+        <div class="inputs">
+          <input type="number" id="input-1" placeholder="2" />
+          <input type="number" id="input-2" placeholder="5" />
+        </div>
+
+        <div class="cal-buttons">
+          <button onclick="addValue()" id="btn">+</button>
+          <button onclick="subValue()" id="btn">-</button>
+          <button onclick="mulValue()" id="btn">*</button>
+          <button onclick="divValue()" id="btn">/</button>
+          <button onclick="perValue()" id="btn">%</button>
+        </div>
+
+        <div class="result">
+          <p>Result:</p>
+          <input type="number" id="result" readonly />
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let displayResult = document.getElementById("result");
+
+      function addValue() {
+        let inputNum1 = document.getElementById("input-1").valueAsNumber;
+        console.log(inputNum1);
+        let inputNum2 = document.getElementById("input-2").valueAsNumber;
+        console.log(inputNum2);
+
+        let addNumber = inputNum1 + inputNum2;
+        console.log(addNumber);
+        displayResult.value = addNumber;
+      }
+
+      function subValue() {
+        let inputNum1 = document.getElementById("input-1").valueAsNumber;
+        console.log(inputNum1);
+        let inputNum2 = document.getElementById("input-2").valueAsNumber;
+        console.log(inputNum2);
+
+        let subNumber = inputNum1 - inputNum2;
+        console.log(subNumber);
+        displayResult.value = subNumber;
+      }
+
+      function mulValue() {
+        let inputNum1 = document.getElementById("input-1").valueAsNumber;
+        console.log(inputNum1);
+        let inputNum2 = document.getElementById("input-2").valueAsNumber;
+        console.log(inputNum2);
+
+        let mulNumber = inputNum1 * inputNum2;
+        console.log(mulNumber);
+        displayResult.value = mulNumber;
+      }
+
+      function divValue() {
+        let inputNum1 = document.getElementById("input-1").valueAsNumber;
+        console.log(inputNum1);
+        let inputNum2 = document.getElementById("input-2").valueAsNumber;
+        console.log(inputNum2);
+
+        let divNumber = inputNum1 / inputNum2;
+        console.log(divNumber);
+        displayResult.value = divNumber;
+      }
+
+      function perValue() {
+        let inputNum1 = document.getElementById("input-1").valueAsNumber;
+        console.log(inputNum1);
+        let inputNum2 = document.getElementById("input-2").valueAsNumber;
+        console.log(inputNum2);
+
+        let perNumber = (inputNum1 / inputNum2) * 100;
+        console.log(perNumber);
+        displayResult.value = perNumber;
+      }
+    </script>
+  </body>
+</html>
