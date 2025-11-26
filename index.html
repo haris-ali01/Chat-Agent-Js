@@ -146,6 +146,15 @@
     </div>
 
     <script>
+
+      let gettingStarted = document.getElementById("userInput");
+      gettingStarted.addEventListener("keydown", function (e) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById("input-btn").click();
+        }
+      });
+
       function startAgent() {
         let userValue = document.getElementById("userInput");
         let checkValue = userValue.value.toLowerCase();
